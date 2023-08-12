@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, TextInput, View } from "react-native";
-import PrimaryButton from "../components/PrimaryButton";
+import PrimaryButton from "../components/ui/PrimaryButton";
 import { useState } from "react";
+import Colors from "../constants/colors";
 
 function StartGameScreen({onConfirmNumber}) {
 
@@ -57,7 +58,7 @@ export default StartGameScreen;
 
 const styles = StyleSheet.create({
     inputContainer: {
-        backgroundColor: '#4e0329',
+        backgroundColor: Colors.primary800,
         borderRadius: 8,
         /* Elevation is an IOS property only */
         elevation: 4,
@@ -76,9 +77,9 @@ const styles = StyleSheet.create({
         height: 50,
         width: 50,
         fontSize: 32,
-        borderBottomColor: '#ddb52f',
+        borderBottomColor: Colors.accent500,
         borderBottomWidth: 2,
-        color: '#ddb52f',
+        color: Colors.accent500,
         marginVertical: 8,
         fontWeight: 'bold',
         textAlign: 'center',
