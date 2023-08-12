@@ -1,6 +1,9 @@
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 import Title from "../components/ui/Title";
 import { useEffect, useState } from "react";
+import { Ionicons } from '@expo/vector-icons'
+
+import GuessLogItem from "../components/game/GuessLogItem";
 import NumberContainer from "../components/game/NumberContainer";
 import PrimaryButton from "../components/ui/PrimaryButton";
 import InstructionText from "../components/ui/InstructionText";
@@ -19,18 +22,25 @@ let minBoundary = 1;
 let maxBoundary = 100;
 
 function GameScreen({ userNumber, onGameOver }) {
-    const initialGuess = generateRandomBetween( 1, 100, userNumber )
+    const initialGuess = generateRandomBetween( 0, 100, userNumber )
     const [currentGuess, setCurrentGuess] = useState(initialGuess);
+    const [guessRounds, setGuessRounds] = useState([initialGuess]);
 
     useEffect( () => {
         if( currentGuess === userNumber ) {
-            onGameOver();
+            onGameOver(guessRounds.length);
         }
     }, [ currentGuess, userNumber, onGameOver ] )
 
-    function nextGuessHandler(direction) {
+    useEffect( () => {
+        minBoundary = 1;
+        maxBoundary = 100;
+    }, [] )
 
-        if( (direction === 'lower' && currentGuess < userNumber) || (direction === 'greater' && currentGuess > userNumber)) {
+    function nextGuessHandler(direction) {
+       
+        if( (direction === 'lower' && currentGuess < userNumber) || 
+        (direction === 'greater' && currentGuess > userNumber)) {
             Alert.alert('Dont lie!', 'You know that this is wrong...', [{ text: 'Sorry!', style: 'cancel' } ])
             return;
         }
@@ -44,20 +54,45 @@ function GameScreen({ userNumber, onGameOver }) {
 
         const newRndNumber = generateRandomBetween( minBoundary, maxBoundary, currentGuess);
         setCurrentGuess( newRndNumber )
+        setGuessRounds( prevGuessRounds => [ ...prevGuessRounds, newRndNumber ] )
     }
+
+    const guessRoundsListLength = guessRounds.length;
 
     return (
        <View style={styles.screen}>
             <Title>Opponent's Guess</Title>
                 <NumberContainer> {currentGuess} </NumberContainer>
             <View>
-                <InstructionText>Higher or Lower?</InstructionText>
-                <View>
-                    <PrimaryButton onPress = {nextGuessHandler.bind( this, 'greater' )}>+</PrimaryButton>
-                    <PrimaryButton onPress = {nextGuessHandler.bind( this, 'lower' )}>-</PrimaryButton>
+                <InstructionText style = { styles.instructionText } >Higher or Lower?</InstructionText>
+                <View style={styles.buttonsContainer}>
+                    <View style={styles.buttonContainer}>
+                    <PrimaryButton onPress = {nextGuessHandler.bind( this, 'lower' )}>
+                        <Ionicons name = 'md-remove' size = {24} color = "white" />
+                    </PrimaryButton>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton onPress = {nextGuessHandler.bind( this, 'greater' )}> 
+                            <Ionicons name = 'md-add' size = {24} color = "white" />
+                        </PrimaryButton>
+                    </View>
                 </View>
             </View>
-            {/* <View> Log Rounds </View> */}
+            <View style={styles.listContainer}>
+                {/* {guessRounds.map( (guessRound) => {
+                    return <Text key = {guessRound}>{guessRound}</Text>
+                })} */}
+                <FlatList
+                    data = {guessRounds}
+                    renderItem = { (itemData) => (
+                        <GuessLogItem
+                            roundNumber={guessRoundsListLength - itemData.index}
+                            guess={itemData.item}
+                        />
+                    )}
+                  
+                />
+            </View>
        </View>
        
     )
@@ -69,6 +104,19 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         padding: 24,
+    },
+    instructionText: {
+        marginBottom: 12
+    },
+    buttonsContainer: {
+        flexDirection: 'row',
+    },
+    buttonContainer: {
+        flex: 1
+    },
+    listContainer: {
+        flex: 1,
+        padding: 16,
     },
    
 })
